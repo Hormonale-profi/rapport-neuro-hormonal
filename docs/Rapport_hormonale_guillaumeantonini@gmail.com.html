@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de Profil Neuro-Hormonal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            border-radius: 20px;
+            color: white;
+            padding: 40px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .patient-info {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .patient-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .report-date {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .score-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+        
+        .score-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            padding: 2px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+            border-radius: inherit;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: xor;
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .score-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .profile-section {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+        
+        .radar-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+        }
+        
+        .profile-tags {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .profile-tag {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .profile-tag.secondary {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+        }
+        
+        .content-block {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .content-block h3 {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .content-block p {
+            color: #475569;
+            line-height: 1.7;
+        }
+        
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .recommendation-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid transparent;
+        }
+        
+        .recommendation-card.nutrition {
+            border-top-color: #10b981;
+        }
+        
+        .recommendation-card.training {
+            border-top-color: #f59e0b;
+        }
+        
+        .recommendation-card.motivation {
+            border-top-color: #ef4444;
+        }
+        
+        .recommendation-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .nutrition .recommendation-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .training .recommendation-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .motivation .recommendation-icon {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: #1e293b;
+            border-radius: 16px;
+            color: white;
+        }
+        
+        .footer p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        @media print {
+            body { background: white; }
+            .container { max-width: none; padding: 20px; }
+            .profile-section { box-shadow: none; border: 1px solid #e2e8f0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Rapport de Profil Neuro-Hormonal</h1>
+            <p class="subtitle">Analyse complète et recommandations personnalisées</p>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="patient-info">
+            <div class="patient-header">
+                <h2 class="patient-name">ANNIE</h2>
+                <div class="report-date">35</div>
+            </div>
+        </div>
+
+        <!-- Scores -->
+        <div class="scores-grid">
+            <div class="score-card">
+                <div class="score-value">270</div>
+                <div class="score-label">Score 1A</div>
+            </div>
+            <div class="score-card">
+                <div class="score-value">446</div>
+                <div class="score-label">Score 1B</div>
+            </div>
+            <div class="score-card">
+                <div class="score-value">526</div>
+                <div class="score-label">Score 2A</div>
+            </div>
+            <div class="score-card">
+                <div class="score-value">557</div>
+                <div class="score-label">Score 2B</div>
+            </div>
+            <div class="score-card">
+                <div class="score-value">456</div>
+                <div class="score-label">Score 3</div>
+            </div>
+        </div>
+
+        <!-- Profil Analysis -->
+        <div class="profile-section">
+            <h2 class="section-title">Analyse du Profil</h2>
+            
+            <div class="profile-tags">
+                <div class="profile-tag">2B</div>
+                <div class="profile-tag secondary">2A</div>
+            </div>
+
+            <div class="radar-container">
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <div class="content-block">
+                <h3>Profil Global</h3>
+                <p>2B-2A</p>
+            </div>
+        </div>
+
+        <!-- Synthesis -->
+        <div class="profile-section">
+            <h2 class="section-title">Synthèse Globale</h2>
+            <div class="content-block">
+                <p>Vous appartenez au profil Émotionnel sensible (2B), avec une influence de l’Analytique adaptable (2A).
+
+Votre fonctionnement neuro-hormonal principal révèle un profil Émotionnel sensible (2B) : vous êtes avant tout guidé(e) par une grande sensibilité émotionnelle. Vous ressentez fortement les ambiances, les paroles et les situations, ce qui fait de vous une personne profondément empathique, à l’écoute des autres et très connectée à votre propre ressenti.
+
+En parallèle, votre profil secondaire 2A vous apporte une dimension analytique et une recherche de cadre : vous appréciez comprendre le pourquoi des choses et vous progressez mieux quand l’environnement est bienveillant mais aussi structuré. Cette combinaison fait de vous quelqu’un de particulièrement réceptif(ve) à la dynamique de groupe, à l’ambiance et au soutien extérieur, tout en ayant besoin de repères clairs et d’une certaine variété pour rester motivé(e).
+
+Cela signifie que votre équilibre se construit autour d’un besoin de sécurité émotionnelle, de reconnaissance et d’encouragement, mais aussi de stimulation intellectuelle et de changement contrôlé. Vous êtes capable de vous investir à fond, à condition de vous sentir compris(e) et accompagné(e), sans pression excessive ni routine trop rigide.
+
+Attention toutefois : cette sensibilité élevée peut parfois vous exposer à des fluctuations de motivation ou à des phases de découragement si le contexte devient trop changeant ou si vous perdez vos repères.
+
+En travaillant à la fois sur la gestion de vos émotions et sur la construction de routines souples, vous pouvez progresser en confiance, trouver du plaisir dans l’action, et tenir sur la durée sans vous épuiser.</p>
+            </div>
+        </div>
+
+        <!-- Strengths and Attention Points -->
+        <div class="profile-section">
+            <h2 class="section-title">Forces & Points d'Attention</h2>
+            
+            <div class="content-block">
+                <h3>🎯 Forces Naturelles</h3>
+                <p>Votre combinaison de profils vous offre une très grande richesse humaine et une capacité d’adaptation remarquable :
+
+Grande sensibilité et capacité d’écoute
+Vous ressentez intensément les ambiances, savez décoder les émotions des autres et créer un climat de bienveillance autour de vous.
+Pour activer cette force : cherchez des environnements chaleureux et prenez le temps d’écouter vos propres ressentis.
+
+Ouverture à la nouveauté et souplesse
+Votre adaptabilité vous permet d’intégrer de nouveaux repères, de vous ajuster face aux changements et de rebondir dans des situations diverses.
+Pour renforcer ce point fort : accueillez la nouveauté sans crainte, osez expérimenter de nouvelles façons de progresser.
+
+Recherche du collectif et de la stimulation extérieure
+Vous êtes motivé(e) par l’encouragement et la dynamique de groupe, ce qui vous pousse à donner le meilleur de vous-même dès que l’environnement est positif.
+Pour maximiser cette force : impliquez-vous dans des projets collectifs, échangez avec d’autres et valorisez le travail d’équipe.
+
+Capacité à transformer vos émotions en moteur d’action
+Vous savez utiliser vos ressentis pour avancer, vous motiver et accompagner les autres dans leur progression.
+Pour en profiter : faites confiance à votre intuition, écoutez vos envies profondes et utilisez-les comme guide.</p>
+            </div>
+            
+            <div class="content-block">
+                <h3>⚠️ Points d'Attention</h3>
+                <p>Votre sensibilité et votre adaptabilité sont des forces à double tranchant :
+
+Risque de surcharge émotionnelle
+Trop d’adaptation ou d’exposition à un environnement négatif peut vous fatiguer moralement.
+Clé d’activation : Planifiez un bilan émotionnel hebdomadaire pour faire le point sur vos ressentis, besoins et limites.
+
+Difficulté à dire non
+L’envie de plaire et la peur de décevoir vous amènent parfois à dépasser vos propres limites.
+Clé d’activation : Avant d’accepter une nouvelle sollicitation, posez-vous la question Est-ce vraiment bon pour moi ?
+
+Fluctuation de motivation selon l’environnement
+Votre engagement dépend du climat autour de vous.
+Clé d’activation : Créez une liste de soutiens de secours : musiques, lectures, proches, à solliciter en cas de baisse de moral.
+
+Risque de ne pas prioriser vos objectifs personnels
+À force de vouloir vous adapter, vous oubliez parfois vos propres priorités.
+Clé d’activation : Relisez vos objectifs chaque semaine et adaptez votre planning pour y consacrer un vrai temps.</p>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="profile-section">
+            <h2 class="section-title">Recommandations Personnalisées</h2>
+            
+            <div class="recommendations-grid">
+                <div class="recommendation-card nutrition">
+                    <div class="recommendation-icon">🥗</div>
+                    <h3>Alimentation</h3>
+                    <p>Votre profil révèle une dominance noradrénaline élevée/sérotonine basse (2B), avec une influence noradrénergique (2A). Vous êtes très réceptif(ve) à l’environnement, aux variations d’ambiance, et vulnérable au stress ou à la perte de repères. Votre équilibre alimentaire doit renforcer la stabilité émotionnelle, prévenir la compensation sous tension, et rester souple.
+
+Ce qui vous convient le mieux :
+
+Favorisez les protéines de qualité pour soutenir la résilience émotionnelle
+Œufs, volailles, poissons, produits laitiers, légumineuses, graines de courge : pour stabiliser la motivation et limiter l’épuisement lié au stress émotionnel.
+Source : Benton D, Donohoe RT. The effects of nutrients on mood. Public Health Nutrition. 1999.
+
+Ajoutez des glucides complexes pour favoriser la sérotonine et limiter l’agitation
+Riz complet, patate douce, quinoa, pois chiches : ils réduisent la nervosité, limitent les variations d’humeur et améliorent la récupération émotionnelle.
+Source : Wurtman JJ, Wurtman RJ. Brain serotonin, carbohydrate-craving, obesity and depression. Obesity Research. 1995.
+
+Gardez une structure de repas rassurante, sans routine extrême
+Prendre les repas à horaires réguliers, avec des rituels apaisants (présentation des plats, ambiance détendue) aide à limiter le risque de compensation ou de perte de contrôle.
+
+Ce que vous devez éviter :
+
+Limitez les sucres rapides, qui aggravent la vulnérabilité émotionnelle
+Les fluctuations rapides de glycémie favorisent la tentation du grignotage et les variations d’humeur.
+Source : Benton D. The impact of diet on anti-social, violent and criminal behaviour. Neuroscience & Biobehavioral Reviews. 2007.
+
+Modérez la caféine et les excitants pour ne pas amplifier le stress
+Votre système est sensible à la surstimulation, surtout lors de périodes émotionnelles intenses.
+Source : Nehlig A. Health effects of coffee/caffeine on brain and behaviour: Facts and uncertainties. Nutritional Neuroscience. 2016.
+
+Évitez la privation et la culpabilité alimentaire
+Une alimentation trop stricte ou culpabilisante augmente le risque de craquage sous tension.</p>
+                </div>
+                
+                <div class="recommendation-card training">
+                    <div class="recommendation-icon">💪</div>
+                    <h3>Entraînement</h3>
+                    <p>Votre profil révèle une dominance noradrénaline élevée/sérotonine basse (2B), enrichie par une influence noradrénergique (2A). Vous êtes guidé(e) par l’émotion, la réactivité et l’ambiance, mais aussi par l’énergie du groupe et le besoin de reconnaissance extérieure. Vous progressez grâce à la convivialité, la variété et le plaisir partagé, mais vous êtes sensible au stress ou au manque de repères.
+
+Ce qui vous convient le mieux :
+
+Optez pour des séances collectives à ambiance positive et rituels stables
+Cours collectifs en musique, bootcamp en groupe, ateliers sensoriels, ou sports d’équipe sont idéals pour nourrir votre motivation.
+Astuce : Gardez quelques repères fixes (jours, heures, partenaire régulier) pour rassurer votre besoin de cadre.
+
+Favorisez la variété des formats et des sensations
+Alternez circuits ludiques, jeux sportifs, ateliers d’expression corporelle, ou challenges d’équipe, pour éviter la lassitude et stimuler l’engagement.
+
+Incluez régulièrement des défis ou des moments de reconnaissance
+Votre motivation est boostée par l’encouragement, la valorisation, et le partage d’objectifs. Créez des petits rituels de célébration après chaque progrès.
+
+Ce que vous devez éviter :
+
+Le manque d’ambiance, la pression négative ou la routine sans plaisir
+Des séances tristes, solitaires ou répétitives nuisent à votre implication. Préservez toujours la dimension partagée.
+
+Les programmes ultra-rigides ou impersonnels
+Gardez de la souplesse, adaptez-vous à l’énergie du moment.
+
+Idées de sports & méthodes à explorer :
+
+Cours collectifs en musique, bootcamp ambiance
+
+Sports d’équipe, jeux sportifs collectifs
+
+Fitness sensoriel, ateliers ludiques
+
+Stretching ou relaxation en groupe
+
+À retenir
+Votre moteur, c’est l’émotion partagée : progressez dans la convivialité, la reconnaissance et la variété, tout en gardant quelques repères fixes pour éviter la dérive.</p>
+                </div>
+                
+                <div class="recommendation-card motivation">
+                    <div class="recommendation-icon">🎯</div>
+                    <h3>Motivation</h3>
+                    <p>Votre moteur, c’est l’émotion partagée, la convivialité et le plaisir d’évoluer ensemble. Le découragement vient souvent d’un manque d’ambiance ou de repères. Voici comment entretenir votre motivation jour après jour :
+
+1. Créez des rituels collectifs positifs
+Planifiez chaque semaine un rendez-vous sportif en groupe ou en duo, dans une ambiance chaleureuse.
+Animez le groupe : musique, encouragements, défis communs, petits jeux.
+
+2. Diversifiez vos formats et vos rythmes
+Alternez entre séances dynamiques, activités ludiques, et moments plus doux (relaxation, stretching, danse plaisir…).
+Notez dans un carnet les séances où vous avez ressenti le plus d’énergie ou de joie.
+
+3. Gérez les phases de doute ou de baisse d’énergie
+Quand la motivation flanche, faites appel au collectif : invitez un ami, rejoignez un cours, partagez votre ressenti avec le groupe.
+L’entraide et la reconnaissance sont de puissants moteurs pour vous.
+
+4. Célébrez chaque cap franchi ensemble
+À chaque objectif atteint, fêtez-le collectivement (sortie, message de félicitations, photo souvenir…).
+Mettez en avant la progression du groupe autant que la vôtre.
+
+À retenir
+Votre motivation se nourrit du partage et de l’ambiance : structurez vos routines autour du collectif, de la diversité et de la bienveillance, pour progresser dans la joie et la sécurité émotionnelle.
+
+</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Ce rapport a été généré par analyse approfondie de votre profil neuro-hormonal. Les recommandations sont personnalisées selon vos résultats spécifiques.</p>
+        </div>
+    </div>
+
+    <script>
+        // Radar Chart Configuration
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        
+        // Extract scores for radar chart
+        const score1A = parseFloat('270') || 0;
+        const score1B = parseFloat('446') || 0;
+        const score2A = parseFloat('526') || 0;
+        const score2B = parseFloat('557') || 0;
+        const score3 = parseFloat('456') || 0;
+
+        // Initialiser le graphique radar
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Score 1A', 'Score 1B', 'Score 2A', 'Score 2B', 'Score 3'],
+                datasets: [{
+                    label: 'Profil Neuro-Hormonal',
+                    data: [score1A, score1B, score2A, score2B, score3],
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20,
+                            font: {
+                                size: 12,
+                                family: 'Inter'
+                            },
+                            color: '#64748b'
+                        },
+                        grid: {
+                            color: 'rgba(100, 116, 139, 0.2)'
+                        },
+                        angleLines: {
+                            color: 'rgba(100, 116, 139, 0.2)'
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 13,
+                                family: 'Inter',
+                                weight: '500'
+                            },
+                            color: '#1e293b'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
